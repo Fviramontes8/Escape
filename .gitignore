@@ -1,3 +1,5 @@
+# Unreal Generated Files
+
 Binaries
 
 Build
@@ -8,5 +10,8 @@ Intermediate
 Saved
 
 Content/StarterContent
+
+
+# Visual Studio Generated Files
 
 .vs/Escape_/v15/Browse.VC.db
