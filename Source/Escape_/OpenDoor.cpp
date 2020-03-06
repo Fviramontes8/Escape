@@ -20,9 +20,11 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Getting object details
 	AActor* Owner = GetOwner();
+	
+	//Make the object rotate 55 degrees on the x-axis
 	FRotator NewRotation = FRotator(0.0f, 55.0f, 0.0f);
-
 	Owner->SetActorRotation(NewRotation);
 }
 

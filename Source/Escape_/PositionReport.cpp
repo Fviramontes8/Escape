@@ -20,9 +20,13 @@ void UPositionReport::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Grabs the object's name (e.g. chair, rock, door)
 	FString ObjectName = GetOwner()->GetName();
-	FString ObjectPos = GetOwner()->GetTransform().GetLocation().ToString(); //"X: Y: Z:";
 
+	//Gets the X-Y-Z coordinates in vector format and converts to a string
+	FString ObjectPos = GetOwner()->GetTransform().GetLocation().ToString();
+
+	//Logs object name and object position to the Output Log
 	UE_LOG(LogTemp, Warning, TEXT("%s is at position %s"), *ObjectName, *ObjectPos);
 	
 }
