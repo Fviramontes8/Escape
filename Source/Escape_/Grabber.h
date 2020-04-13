@@ -40,5 +40,6 @@ private:
 
 	//Hits for first physics in reach
 	const FHitResult GetPhysicsBodyInReach(bool debug);
+	FTwoVectors GetLineTracePoints() const;
 
 };

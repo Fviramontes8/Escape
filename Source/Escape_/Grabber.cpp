@@ -45,8 +45,6 @@ void UGrabber::FindInputComponent()
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Input component is found"));
-		//Binding input axis
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
 	}
@@ -58,8 +56,6 @@ void UGrabber::FindInputComponent()
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab called"));
-		
 	FHitResult HitResult = GetPhysicsBodyInReach(false);
 	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
 	AActor* ActorHit = HitResult.GetActor();
@@ -77,8 +73,6 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Released called"));
-
 	PhysicsHandle->ReleaseComponent();
 }
 
@@ -87,14 +81,11 @@ void UGrabber::Release()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerViewPointLocation, PlayerViewPointRotation);
-	FVector PlayerLineTraceEnd = PlayerViewPointLocation + (PlayerViewPointRotation.Vector() * Reach);
+
 
 	if (PhysicsHandle->GrabbedComponent)
 	{
+		FVector PlayerLineTraceEnd = GetLineTracePoints().v2;
 		PhysicsHandle->SetTargetLocation(PlayerLineTraceEnd);
 	}
 }
@@ -102,26 +93,10 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 //Checks if there is an physics body in reach of the player
 const FHitResult UGrabber::GetPhysicsBodyInReach(bool debug=false)
 {
-	//x, y, z
-	FVector PlayerViewPointLocation;
+	FTwoVectors PlayerViewLocationAndLineTraceEnd = GetLineTracePoints();
 
-	//pitch (p), yaw (y), roll (r)
-	FRotator PlayerViewPointRotation;
-
-	//Update Location and rotation of the player
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerViewPointLocation, PlayerViewPointRotation);
-
-	if (debug)
-	{
-		//Convert data to strings
-		FString PlayerViewLocationString = PlayerViewPointLocation.ToString();
-		FString PlayerViewRotationString = PlayerViewPointRotation.ToString();
-
-		//Print string to log, used for debugging purposes
-		UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), *PlayerViewLocationString, *PlayerViewRotationString);
-	}
-
-	FVector PlayerLineTraceEnd = PlayerViewPointLocation + (PlayerViewPointRotation.Vector() * Reach);
+	FVector PlayerViewPointLocation = PlayerViewLocationAndLineTraceEnd.v1;
+	FVector PlayerLineTraceEnd = PlayerViewLocationAndLineTraceEnd.v2;
 
 	if (debug)
 	{
@@ -162,4 +137,32 @@ const FHitResult UGrabber::GetPhysicsBodyInReach(bool debug=false)
 	}
 
 	return LineTraceHit;
+}
+
+FTwoVectors UGrabber::GetLineTracePoints() const
+{
+	//x, y, z
+	FVector PlayerViewPointLocation;
+
+	//pitch (p), yaw (y), roll (r)
+	FRotator PlayerViewPointRotation;
+
+	//Update Location and rotation of the player and wrtie to PlayerViewPointLocation, and PlayerViewPointRotation
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerViewPointLocation, PlayerViewPointRotation);
+
+	//Logs player location and rotation
+	bool debug = false;
+	if (debug)
+	{
+		//Convert data to strings
+		FString PlayerViewLocationString = PlayerViewPointLocation.ToString();
+		FString PlayerViewRotationString = PlayerViewPointRotation.ToString();
+
+		//Print string to log, used for debugging purposes
+		UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), *PlayerViewLocationString, *PlayerViewRotationString);
+	}
+
+	FVector PlayerLineTraceEnd = PlayerViewPointLocation + (PlayerViewPointRotation.Vector() * Reach);
+
+	return FTwoVectors(PlayerViewPointLocation, PlayerLineTraceEnd);
 }
