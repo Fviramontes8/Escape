@@ -25,6 +25,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void FindPhysicsComponent();
+	void FindInputComponent();
 
 private:
 	float Reach = 200.0f;
@@ -34,4 +36,8 @@ private:
 	UInputComponent* InputComponent = nullptr;
 
 	void Grab();
+	void Release();
+
+	//Hits for first physics in reach
+	const FHitResult GetPhysicsBodyInReach();
 };

@@ -12,7 +12,6 @@ UGrabber::UGrabber()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
 
 
@@ -20,9 +19,15 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("Grabber is here"));
-	///Look for physics handle
 
+	//Looks for physics handle
+	FindPhysicsComponent();
+	//Looks for input handle
+	FindInputComponent();
+}
+
+void UGrabber::FindPhysicsComponent()
+{
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	if (PhysicsHandle)
 	{
@@ -32,13 +37,17 @@ void UGrabber::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *GetOwner()->GetName());
 	}
+}
 
+void UGrabber::FindInputComponent()
+{
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
-	if (InputComponent) 
+	if (InputComponent)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Input component is found"));
 		//Binding input axis
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
 	}
 	else
 	{
@@ -49,6 +58,17 @@ void UGrabber::BeginPlay()
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab called"))
+
+		//Try to reach any actor with a physics body
+
+		//If we hit something, attach a physics handle
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Released called"))
+
+		//Release physics handle
 }
 
 
@@ -57,7 +77,12 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Get player view point, player location as well as player rotation
+	FHitResult Something = GetPhysicsBodyInReach();
+}
+
+const FHitResult UGrabber::GetPhysicsBodyInReach()
+{
+	/// Get player view point, player location as well as player rotation
 
 	//x, y, z
 	FVector PlayerViewPointLocation;
@@ -77,13 +102,13 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	//Creates a line trace end and shows it as a red line in the game world
 	FVector PlayerLineTraceEnd = PlayerViewPointLocation + (PlayerViewPointRotation.Vector() * Reach);
-	DrawDebugLine(GetWorld(), 
-		PlayerViewPointLocation, 
-		PlayerLineTraceEnd, 
-		FColor(255, 0, 0), 
-		false, 
-		0.0f, 
-		0.0f, 
+	DrawDebugLine(GetWorld(),
+		PlayerViewPointLocation,
+		PlayerLineTraceEnd,
+		FColor(255, 0, 0),
+		false,
+		0.0f,
+		0.0f,
 		10.0f
 	);
 
@@ -92,10 +117,10 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	//Ray-cast out to reach distance
 	FHitResult LineTraceHit;
-	GetWorld()->LineTraceSingleByObjectType(LineTraceHit, 
-		PlayerViewPointLocation, 
-		PlayerLineTraceEnd, 
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody), 
+	GetWorld()->LineTraceSingleByObjectType(LineTraceHit,
+		PlayerViewPointLocation,
+		PlayerLineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	);
 
@@ -105,5 +130,6 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
 	}
-}
 
+	return LineTraceHit;
+}
