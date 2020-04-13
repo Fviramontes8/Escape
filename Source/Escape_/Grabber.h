@@ -39,5 +39,6 @@ private:
 	void Release();
 
 	//Hits for first physics in reach
-	const FHitResult GetPhysicsBodyInReach();
+	const FHitResult GetPhysicsBodyInReach(bool debug);
+
 };
