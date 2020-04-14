@@ -2,6 +2,7 @@
 
 #include "OpenDoor.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
+#include "Classes/Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 
 
@@ -23,9 +24,34 @@ void UOpenDoor::BeginPlay()
 
 	//Getting object details
 	Owner = GetOwner();
+}
+
+
+// Called every frame
+void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	//Getting the pawn that the player contols
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+	AActor* ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+
+	if (GetTotalMassOnPlate() > TriggerMass)
+	//if (PressurePlate->IsOverlappingActor(ActorThatOpens))
+	{
+		OpeningDoor();
+		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+	}
+	else
+	{
+		ClosingDoor();
+	}
+
+	/*
+	if ((!PressurePlate->IsOverlappingActor(ActorThatOpens)) && (GetWorld()->GetTimeSeconds() + DoorCloseDelay > LastDoorOpenTime))
+	{
+		ClosingDoor();
+	}
+	*/
 }
 
 void UOpenDoor::OpeningDoor()
@@ -43,21 +69,22 @@ void UOpenDoor::ClosingDoor()
 	Owner->SetActorRotation(Rotation);
 }
 
-
-// Called every frame
-void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+float UOpenDoor::GetTotalMassOnPlate() 
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	float TotalMass = 0.0f;
 
-	// ...
-	if (PressurePlate->IsOverlappingActor(ActorThatOpens))
+	TArray<AActor*> OverlappingActors;
+
+	//Updates Overlapping Actors
+	PressurePlate->GetOverlappingActors(OverlappingActors);
+
+	for (const auto* Actor : OverlappingActors)
 	{
-		OpeningDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+		UPrimitiveComponent* OverlappedActor = Actor->FindComponentByClass<UPrimitiveComponent>();
+		TotalMass += OverlappedActor->GetMass();
+		//UE_LOG(LogTemp, Warning, TEXT("%s found on the plate"), *i->GetName());
 	}
-	if ((!PressurePlate->IsOverlappingActor(ActorThatOpens)) && (GetWorld()->GetTimeSeconds() + DoorCloseDelay > LastDoorOpenTime))
-	{
-		ClosingDoor();
-	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("%f mass found"), TotalMass);
+	return TotalMass;
 }
-

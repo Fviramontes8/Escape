@@ -37,6 +37,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float DoorCloseDelay = 1.0f;
+	float TriggerMass = 9.0f;
 	float LastDoorOpenTime;
 
 	//For the rotation of objects
@@ -45,7 +46,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* PressurePlate;
 
-	//UPROPERTY(EditAnywhere)
-	AActor* ActorThatOpens;
 	AActor* Owner;
+
+	//Returns total mass in kg
+	float GetTotalMassOnPlate();
 };
