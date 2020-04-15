@@ -44,9 +44,9 @@ private:
 	FRotator Rotation;
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
+	ATriggerVolume* PressurePlate = nullptr;
 
-	AActor* Owner;
+	AActor* Owner = nullptr;
 
 	//Returns total mass in kg
 	float GetTotalMassOnPlate();

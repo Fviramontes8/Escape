@@ -33,10 +33,9 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	//Getting the pawn that the player contols
-	AActor* ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+	//AActor* ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 
 	if (GetTotalMassOnPlate() > TriggerMass)
-	//if (PressurePlate->IsOverlappingActor(ActorThatOpens))
 	{
 		OpeningDoor();
 		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
@@ -45,28 +44,26 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	{
 		ClosingDoor();
 	}
-
-	/*
-	if ((!PressurePlate->IsOverlappingActor(ActorThatOpens)) && (GetWorld()->GetTimeSeconds() + DoorCloseDelay > LastDoorOpenTime))
-	{
-		ClosingDoor();
-	}
-	*/
 }
 
 void UOpenDoor::OpeningDoor()
 {
-
-	//Make the object rotate 80 degrees on the x-axis
-	Rotation = FRotator(0.0f, OpenAngle, 0.0f);
-	Owner->SetActorRotation(Rotation);
+	if (Owner)
+	{
+		//Make the object rotate 80 degrees on the x-axis
+		Rotation = FRotator(0.0f, OpenAngle, 0.0f);
+		Owner->SetActorRotation(Rotation);
+	}
 }
 
 void UOpenDoor::ClosingDoor()
 {
-	//Sets rotation to 0 degrees and all axis
-	Rotation = FRotator(0.0f, 0.0f, 0.0f);
-	Owner->SetActorRotation(Rotation);
+	if (Owner)
+	{
+		//Sets rotation to 0 degrees and all axis
+		Rotation = FRotator(0.0f, 0.0f, 0.0f);
+		Owner->SetActorRotation(Rotation);
+	}
 }
 
 float UOpenDoor::GetTotalMassOnPlate() 
@@ -81,10 +78,11 @@ float UOpenDoor::GetTotalMassOnPlate()
 	for (const auto* Actor : OverlappingActors)
 	{
 		UPrimitiveComponent* OverlappedActor = Actor->FindComponentByClass<UPrimitiveComponent>();
-		TotalMass += OverlappedActor->GetMass();
-		//UE_LOG(LogTemp, Warning, TEXT("%s found on the plate"), *i->GetName());
+		if (OverlappedActor)
+		{
+			TotalMass += OverlappedActor->GetMass();
+		}
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("%f mass found"), TotalMass);
 	return TotalMass;
 }
