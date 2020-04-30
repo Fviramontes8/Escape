@@ -48,12 +48,15 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UOpenDoor::OpeningDoor()
 {
+	/*
 	if (Owner)
 	{
 		//Make the object rotate 80 degrees on the x-axis
 		Rotation = FRotator(0.0f, OpenAngle, 0.0f);
 		Owner->SetActorRotation(Rotation);
 	}
+	*/
+	OnOpenRequest.Broadcast();
 }
 
 void UOpenDoor::ClosingDoor()
@@ -75,12 +78,15 @@ float UOpenDoor::GetTotalMassOnPlate()
 	//Updates Overlapping Actors
 	PressurePlate->GetOverlappingActors(OverlappingActors);
 
-	for (const auto* Actor : OverlappingActors)
+	if(OverlappingActors.GetAllocatedSize() > 0)
 	{
-		UPrimitiveComponent* OverlappedActor = Actor->FindComponentByClass<UPrimitiveComponent>();
-		if (OverlappedActor)
+		for (const auto* Actor : OverlappingActors)
 		{
-			TotalMass += OverlappedActor->GetMass();
+			UPrimitiveComponent* OverlappedActor = Actor->FindComponentByClass<UPrimitiveComponent>();
+			if (OverlappedActor)
+			{
+				TotalMass += OverlappedActor->GetMass();
+			}
 		}
 	}
 
