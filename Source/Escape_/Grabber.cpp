@@ -12,7 +12,6 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 
@@ -29,19 +28,22 @@ void UGrabber::BeginPlay()
 
 void UGrabber::FindPhysicsComponent()
 {
+	//Looks for PhysicsHandleComponent objects in the game
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	if (PhysicsHandle)
 	{
-		//Physics is found
+		//Physics is found, no error here
 	}
 	else
 	{
+		//Log error
 		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *GetOwner()->GetName());
 	}
 }
 
 void UGrabber::FindInputComponent()
 {
+	//Lets the player grab grabable object with LMB and LShift
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent)
 	{
@@ -56,10 +58,13 @@ void UGrabber::FindInputComponent()
 
 void UGrabber::Grab()
 {
-	FHitResult HitResult = GetPhysicsBodyInReach(false);
+	//Change false to true to visualize grabbing objects
+	bool bDebug = false;
+	FHitResult HitResult = GetPhysicsBodyInReach(bDebug);
 	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
 	AActor* ActorHit = HitResult.GetActor();
 
+	//If Player is in reach and there is an object to grab within its reach
 	if ( (ActorHit) && (ComponentToGrab) )
 	{
 		PhysicsHandle->GrabComponentAtLocationWithRotation(
@@ -84,26 +89,27 @@ void UGrabber::Release()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	bool bLineTraceDebug = false;
 
 	if (PhysicsHandle)
 	{
 		if (PhysicsHandle->GrabbedComponent)
 		{
-			FVector PlayerLineTraceEnd = GetLineTracePoints().v2;
+			FVector PlayerLineTraceEnd = GetLineTracePoints(bLineTraceDebug).v2;
 			PhysicsHandle->SetTargetLocation(PlayerLineTraceEnd);
 		}
 	}
 }
 
 //Checks if there is an physics body in reach of the player
-const FHitResult UGrabber::GetPhysicsBodyInReach(bool debug=false)
+const FHitResult UGrabber::GetPhysicsBodyInReach(bool bDebug=false)
 {
-	FTwoVectors PlayerViewLocationAndLineTraceEnd = GetLineTracePoints();
+	FTwoVectors PlayerViewLocationAndLineTraceEnd = GetLineTracePoints(bDebug);
 
 	FVector PlayerViewPointLocation = PlayerViewLocationAndLineTraceEnd.v1;
 	FVector PlayerLineTraceEnd = PlayerViewLocationAndLineTraceEnd.v2;
 
-	if (debug)
+	if (bDebug)
 	{
 		//Creates a line trace end and shows it as a red line in the game world
 		DrawDebugLine(
@@ -131,7 +137,8 @@ const FHitResult UGrabber::GetPhysicsBodyInReach(bool debug=false)
 		TraceParams
 	);
 
-	if (debug)
+	//Logs if there is a successful grab
+	if (bDebug)
 	{
 		//See what we hit
 		AActor* ActorHit = LineTraceHit.GetActor();
@@ -144,7 +151,7 @@ const FHitResult UGrabber::GetPhysicsBodyInReach(bool debug=false)
 	return LineTraceHit;
 }
 
-FTwoVectors UGrabber::GetLineTracePoints() const
+FTwoVectors UGrabber::GetLineTracePoints(bool bDebug) const
 {
 	//x, y, z
 	FVector PlayerViewPointLocation;
@@ -156,8 +163,7 @@ FTwoVectors UGrabber::GetLineTracePoints() const
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerViewPointLocation, PlayerViewPointRotation);
 
 	//Logs player location and rotation
-	bool debug = false;
-	if (debug)
+	if (bDebug)
 	{
 		//Convert data to strings
 		FString PlayerViewLocationString = PlayerViewPointLocation.ToString();
