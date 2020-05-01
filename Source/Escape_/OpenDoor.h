@@ -9,9 +9,7 @@
 //Make sure that this is the last include file in this file
 #include "OpenDoor.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenRequest); 
-
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloseRequest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent); 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ESCAPE__API UOpenDoor : public UActorComponent
@@ -23,18 +21,20 @@ public:
 	UOpenDoor();
 
 	UPROPERTY(BlueprintAssignable)
-	FOnOpenRequest OnOpenRequest;
+	FDoorEvent OnOpenRequest;
 
-	//UPROPERTY(BlueprintAssignable)
-	//FOnCloseRequest OnCloseRequest;
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnCloseRequest;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	void OpeningDoor();
-
 	void ClosingDoor();
+
+	//Returns total mass in kg
+	float GetTotalMassOnPlate();
 
 public:	
 	// Called every frame
@@ -44,10 +44,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	float OpenAngle = 80.0f;
 
-	UPROPERTY(EditAnywhere)
-	float DoorCloseDelay = 1.0f;
 	float TriggerMass = 9.0f;
-	float LastDoorOpenTime;
 
 	//For the rotation of objects
 	FRotator Rotation;
@@ -56,7 +53,4 @@ private:
 	ATriggerVolume* PressurePlate = nullptr;
 
 	AActor* Owner = nullptr;
-
-	//Returns total mass in kg
-	float GetTotalMassOnPlate();
 };

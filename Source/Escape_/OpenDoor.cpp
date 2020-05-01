@@ -12,8 +12,6 @@ UOpenDoor::UOpenDoor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -32,13 +30,10 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//Getting the pawn that the player contols
-	//AActor* ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 
 	if (GetTotalMassOnPlate() > TriggerMass)
 	{
 		OpeningDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 	else
 	{
@@ -48,25 +43,12 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UOpenDoor::OpeningDoor()
 {
-	/*
-	if (Owner)
-	{
-		//Make the object rotate 80 degrees on the x-axis
-		Rotation = FRotator(0.0f, OpenAngle, 0.0f);
-		Owner->SetActorRotation(Rotation);
-	}
-	*/
 	OnOpenRequest.Broadcast();
 }
 
 void UOpenDoor::ClosingDoor()
 {
-	if (Owner)
-	{
-		//Sets rotation to 0 degrees and all axis
-		Rotation = FRotator(0.0f, 0.0f, 0.0f);
-		Owner->SetActorRotation(Rotation);
-	}
+	OnCloseRequest.Broadcast();
 }
 
 float UOpenDoor::GetTotalMassOnPlate() 
@@ -78,15 +60,13 @@ float UOpenDoor::GetTotalMassOnPlate()
 	//Updates Overlapping Actors
 	PressurePlate->GetOverlappingActors(OverlappingActors);
 
-	if(OverlappingActors.GetAllocatedSize() > 0)
+	
+	for (const auto* Actor : OverlappingActors)
 	{
-		for (const auto* Actor : OverlappingActors)
+		UPrimitiveComponent* OverlappedActor = Actor->FindComponentByClass<UPrimitiveComponent>();
+		if (OverlappedActor)
 		{
-			UPrimitiveComponent* OverlappedActor = Actor->FindComponentByClass<UPrimitiveComponent>();
-			if (OverlappedActor)
-			{
-				TotalMass += OverlappedActor->GetMass();
-			}
+			TotalMass += OverlappedActor->GetMass();
 		}
 	}
 
