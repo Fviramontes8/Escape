@@ -26,6 +26,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FDoorEvent OnCloseRequest;
 
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -36,14 +39,9 @@ protected:
 	//Returns total mass in kg
 	float GetTotalMassOnPlate();
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 private:
 	UPROPERTY(VisibleAnywhere)
 	float OpenAngle = 80.0f;
-
 	float TriggerMass = 9.0f;
 
 	//For the rotation of objects
