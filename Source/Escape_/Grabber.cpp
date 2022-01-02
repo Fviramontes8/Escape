@@ -7,7 +7,7 @@
 
 
 // Sets default values for this component's properties
-UGrabber::UGrabber()
+UGrabber::UGrabber() : Reach{200.0f}, PhysicsHandle{nullptr}, InputComponent{nullptr}
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -30,11 +30,7 @@ void UGrabber::FindPhysicsComponent()
 {
 	//Looks for PhysicsHandleComponent objects in the game
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
-	{
-		//Physics is found, no error here
-	}
-	else
+	if (!PhysicsHandle)
 	{
 		//Log error
 		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *GetOwner()->GetName());
